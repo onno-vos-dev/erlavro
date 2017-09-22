@@ -62,7 +62,11 @@ type(Name0, Symbols0, Opts) ->
   {Name, Ns0} = avro:split_type_name(Name0, ?NS_GLOBAL),
   Ns          = ?NAME(avro_util:get_opt(namespace, Opts, Ns0)),
   true        = (Ns0 =:= ?NS_GLOBAL orelse Ns0 =:= Ns), %% assert
-  Symbols     = lists:map(fun(S) -> ?SYMBOL(S) end, Symbols0),
+  Symbols     = lists:map(fun(S) when is_binary(S) ->
+                              S;
+                             (S) ->
+                              ?SYMBOL(S)
+                          end, Symbols0),
   ok          = check_symbols(Symbols),
   Doc         = avro_util:get_opt(doc, Opts, ?NO_DOC),
   Aliases0    = avro_util:get_opt(aliases, Opts, []),
@@ -114,8 +118,10 @@ get_index(Value) when ?IS_ENUM_VALUE(Value) ->
 
 %% @doc Get symbol index from type definition.
 -spec get_index(enum_type(), symbol_raw()) -> index().
+get_index(Type, Symbol) when is_binary(Symbol) ->
+  get_index(Symbol, Type#avro_enum_type.symbols, 0);
 get_index(Type, Symbol) ->
-  get_index(?SYMBOL(Symbol), Type#avro_enum_type.symbols, 0).
+  get_index(Type, ?SYMBOL(Symbol)).
 
 %% @doc Find symbol from index.
 -spec get_symbol_from_index(enum_type(), index()) -> symbol().
@@ -143,12 +149,13 @@ check_symbols(Symbols) ->
 %% @private
 -spec do_cast(enum_type(), symbol_raw()) ->
         {ok, avro_value()} | {error, any()}.
-do_cast(Type, Value0) when ?IS_SYMBOL_RAW(Value0) ->
-  Value = ?SYMBOL(Value0),
+do_cast(Type, Value) when is_binary(Value) ->
   case is_valid_symbol(Type, Value) of
     true  -> {ok, ?AVRO_VALUE(Type, Value)};
-    false -> {error, {cast_error, Type, Value0}}
-  end.
+    false -> {error, {cast_error, Type, Value}}
+  end;
+do_cast(Type, Value) when is_atom(Value) orelse is_list(Value) ->
+  do_cast(Type, ?SYMBOL(Value)).
 
 %% @private
 -spec is_valid_symbol(enum_type(), symbol()) -> boolean().

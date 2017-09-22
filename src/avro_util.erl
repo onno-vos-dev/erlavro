@@ -143,16 +143,19 @@ canonicalize_aliases(Aliases, Ns) ->
 %%       handling when converting string() to binary().
 %% @end
 -spec canonicalize_name(name_raw()) -> name().
-canonicalize_name(Name) -> ensure_binary(Name).
+canonicalize_name(Name) when is_binary(Name) ->
+  Name;
+canonicalize_name(Name) ->
+  ensure_binary(Name).
 
 %% @doc Covert atom() | string() binary().
 -spec ensure_binary(name_raw()) -> binary().
 ensure_binary(A) when is_atom(A)   -> atom_to_binary(A, utf8);
-ensure_binary(L) when is_list(L)   -> iolist_to_binary(L);
-ensure_binary(B) when is_binary(B) -> B.
+ensure_binary(L) when is_list(L)   -> iolist_to_binary(L).
 
 %% @doc Canonicalize name if it is not a type.
 -spec canonicalize_type_or_name(type_or_name()) -> type_or_name().
+
 canonicalize_type_or_name(Name) when ?IS_NAME_RAW(Name) ->
   avro:name2type(Name);
 canonicalize_type_or_name(Type) when ?IS_TYPE_RECORD(Type) ->

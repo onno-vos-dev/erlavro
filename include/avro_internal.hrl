@@ -66,7 +66,10 @@
 -type custom_prop_value() :: number() | binary() | [binary()].
 -type custom_prop() :: {custom_prop_name(), custom_prop_value()}.
 
--define(NAME(X), avro_util:canonicalize_name(X)).
+-define(NAME(X), case is_binary(X) of
+                   true -> X;
+                   false -> avro_util:canonicalize_name(X)
+                 end).
 -define(DOC(X), unicode:characters_to_binary(X, utf8)).
 
 -define(IS_NAME_RAW(N), (is_atom(N) orelse is_list(N) orelse is_binary(N))).
