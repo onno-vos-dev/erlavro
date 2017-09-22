@@ -142,6 +142,7 @@ get_field_type(FieldName, Type) when ?IS_RECORD_TYPE(Type) ->
         [{field_name(), type_or_name()}].
 get_all_field_types(Type) when ?IS_RECORD_TYPE(Type) ->
   #avro_record_type{fields = Fields} = Type,
+  ct:pal("Fields ~p", [Fields]),
   lists:map(
     fun(#avro_record_field{ name = FieldName
                           , type = FieldTypeOrName
