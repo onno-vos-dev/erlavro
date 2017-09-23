@@ -142,7 +142,6 @@ get_field_type(FieldName, Type) when ?IS_RECORD_TYPE(Type) ->
         [{field_name(), type_or_name()}].
 get_all_field_types(Type) when ?IS_RECORD_TYPE(Type) ->
   #avro_record_type{fields = Fields} = Type,
-  ct:pal("Fields ~p", [Fields]),
   lists:map(
     fun(#avro_record_field{ name = FieldName
                           , type = FieldTypeOrName
@@ -275,7 +274,6 @@ zip_record_field_types_with_key_value(Name, [{FieldName, FieldType} | Rest],
     FieldValues0) ->
   {FieldValue, FieldValues} =
     take_record_field_value(Name, FieldName, FieldValues0, []),
-  ct:pal("FieldValue ~p FieldValues ~p", [FieldValue, FieldValues]),
   [ {FieldName, FieldType, FieldValue}
   | zip_record_field_types_with_key_value(Name, Rest, FieldValues)
   ].
@@ -288,8 +286,6 @@ zip_record_field_types_with_key_value(Name, [{FieldName, FieldType} | Rest],
 take_record_field_value(RecordName, FieldName, [], _) ->
   erlang:error({field_value_not_found, RecordName, FieldName});
 take_record_field_value(RecordName, FieldName, [{Tag, Value} | Rest], Tried) ->
-  ct:pal("RecordName:~p~nFieldName:~p~nTag:~p~nValue:~p~nRest:~p~nTried:~p~n",
-         [RecordName, FieldName, Tag, Value, Rest, Tried]),
   case ?NAME(Tag) =:= FieldName of
     true ->
       {Value, Tried ++ Rest};
