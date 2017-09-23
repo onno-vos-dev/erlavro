@@ -85,6 +85,7 @@ new(Options) ->
       undefined -> {?MODULE, []};
       Name1     -> {Name1, [named_table]}
     end,
+  avro_schema_store_gen:start(),
   ets:new(Name, [Access, {read_concurrency, true} | EtsOpts]).
 
 %% @doc Create a new schema store and improt the given schema JSON files.
@@ -230,14 +231,15 @@ do_add_type_by_names([Name|Rest], Type, Store) ->
 -spec put_type_to_store(fullname(), avro_type(), store()) -> store().
 put_type_to_store(Name, Type, Store) ->
   true = ets:insert(Store, {Name, Type}),
+  ok = avro_schema_store_gen:store(Name, Type),
   Store.
 
 %% @private
 -spec get_type_from_store(fullname(), store()) -> false | {ok, avro_type()}.
-get_type_from_store(Name, Store) ->
-  case ets:lookup(Store, Name) of
-    []             -> false;
-    [{Name, Type}] -> {ok, Type}
+get_type_from_store(Name, _Store) ->
+  case avro_schema_store_gen:lookup(Name) of
+    {name_not_found, Name} -> false;
+    {type, Type} -> {ok, Type}
   end.
 
 %%%_* Emacs ====================================================================
