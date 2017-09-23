@@ -273,26 +273,32 @@ zip_record_field_types_with_key_value(_Name, [], []) -> [];
 zip_record_field_types_with_key_value(Name, [{FieldName, FieldType} | Rest],
     FieldValues0) ->
   {FieldValue, FieldValues} =
-    take_record_field_value(Name, FieldName, FieldValues0, []),
+    take_record_field_value(Name, FieldName, FieldValues0),
   [ {FieldName, FieldType, FieldValue}
   | zip_record_field_types_with_key_value(Name, Rest, FieldValues)
   ].
 
-%% @private
--spec take_record_field_value(fullname(), field_name(),
-                              [{field_name_raw(), avro:in()}],
-                              [{field_name_raw(), avro:in()}]) ->
-        {avro:in(), [{field_name_raw(), avro:in()}]}.
-take_record_field_value(RecordName, FieldName, [], _) ->
-  erlang:error({field_value_not_found, RecordName, FieldName});
-take_record_field_value(RecordName, FieldName, [{Tag, Value} | Rest], Tried) ->
-  case ?NAME(Tag) =:= FieldName of
-    true ->
-      {Value, Tried ++ Rest};
-    false ->
-      take_record_field_value(RecordName, FieldName, Rest,
-                              [{Tag, Value} | Tried])
+take_record_field_value(RecordName, FieldName, FieldValues) ->
+  case lists:keyfind(FieldName, 1, FieldValues) of
+    false -> erlang:error({field_value_not_found, RecordName, FieldName});
+    {_Key, Value} -> {Value, lists:keydelete(FieldName, 1, FieldValues)}
   end.
+
+%% @private
+%% -spec take_record_field_value(fullname(), field_name(),
+%%                               [{field_name_raw(), avro:in()}],
+%%                               [{field_name_raw(), avro:in()}]) ->
+%%         {avro:in(), [{field_name_raw(), avro:in()}]}.
+%% take_record_field_value(RecordName, FieldName, [], _) ->
+%%   erlang:error({field_value_not_found, RecordName, FieldName});
+%% take_record_field_value(RecordName, FieldName, [{Tag, Value} | Rest], Tried) ->
+%%   case ?NAME(Tag) =:= FieldName of
+%%     true ->
+%%       {Value, Tried ++ Rest};
+%%     false ->
+%%       take_record_field_value(RecordName, FieldName, Rest,
+%%                               [{Tag, Value} | Tried])
+%%   end.
 
 %% @private Try to find a value for a field specified by list of its names
 %% (including direct name and aliases)
