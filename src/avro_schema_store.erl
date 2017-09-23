@@ -230,7 +230,8 @@ do_add_type_by_names([Name|Rest], Type, Store) ->
 %% @private
 -spec put_type_to_store(fullname(), avro_type(), store()) -> store().
 put_type_to_store(Name, Type, Store) ->
-  error_logger:info_msg("NAME ~p~nType~p~n", [Name, Type]),
+  ct:pal("NAME~P~nTYPE~P~n", [Name,1000*1000*1000*1000,Type,
+                                             1000*1000*1000*1000]),
   true = ets:insert(Store, {Name, Type}),
   ok = avro_schema_store_server:store(Name, Type),
   Store.
@@ -239,8 +240,8 @@ put_type_to_store(Name, Type, Store) ->
 -spec get_type_from_store(fullname(), store()) -> false | {ok, avro_type()}.
 get_type_from_store(Name, _Store) ->
   case avro_schema_store_server:lookup(Name) of
-    {name_not_found, Name} -> false;
-    {type, Type} -> {ok, Type}
+    {type, Type} -> {ok, Type};
+    _ -> false
   end.
 
 %%%_* Emacs ====================================================================
