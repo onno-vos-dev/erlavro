@@ -183,7 +183,6 @@
 
 -define(RAISE_ENC_ERR(EXCEPTION_CLASS, EXCEPTION_REASON, THIS_CONTEXT),
         begin
-          Stack = erlang:get_stacktrace(),
           {_Reason_, _Context_} =
             case EXCEPTION_REASON of
               ?ENC_ERR(__Reason__, __Context__) ->
@@ -191,7 +190,7 @@
               _ ->
                 {EXCEPTION_REASON, THIS_CONTEXT}
             end,
-          erlang:raise(EXCEPTION_CLASS, ?ENC_ERR(_Reason_, _Context_), Stack)
+          erlang:raise(EXCEPTION_CLASS, ?ENC_ERR(_Reason_, _Context_), [])
         end).
 -endif.
 

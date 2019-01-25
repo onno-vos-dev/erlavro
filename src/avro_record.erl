@@ -222,8 +222,7 @@ do_default(FullName, FieldName, DoFun, Value) ->
   try
     DoFun(Value)
   catch
-    error : Reason ->
-      Stack = erlang:get_stacktrace(),
+    error : Reason : Stack ->
       Context = [ {record, FullName}
                 , {field, FieldName}
                 , {reason, Reason}
