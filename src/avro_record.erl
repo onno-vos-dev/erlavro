@@ -167,6 +167,7 @@ parse_defaults(#avro_record_type{ fields = Fields
                             , name    = FieldName
                             } = Field) ->
           FieldType = resolve_default_type(FieldType0),
+          ct:pal("FieldType ~p", [FieldType]),
           NewDefault = parse_default(FullName, FieldName,
                                      ParseFun, FieldType, Default),
           %% go deeper
@@ -187,6 +188,7 @@ encode_defaults(#avro_record_type{ fields = Fields
                             , name    = FieldName
                             } = Field) ->
           FieldType = resolve_default_type(FieldType0),
+          ct:pal("FieldType ~p", [FieldType]),
           NewDefault = encode_default(FullName, FieldName,
                                       Lkup, FieldType, Default),
           %% go deeper
